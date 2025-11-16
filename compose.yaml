@@ -1,6 +1,15 @@
 services:
   db:
     container_name: postgres_db
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: appdb
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
     # TODO: 
     # define image (if our container is named postgres_db... i wonder... use 16 as the version.)
@@ -11,7 +20,7 @@ services:
     # given: healthcheck
     # basically just checks that postgres is up and ready
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,16 +36,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    #TODO:
-      # define environment variables
-      # (DB_HOST (the name of the service our db is in)
-      #, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, 
-      # and (this container's) PORT 8080)
-
-    # TODO: 
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: secretpassword
+      DB_NAME: appdb
+      PORT: 8080
+      # TODO: 
       # set our app to run on port 8080
 
-
-# TODO: 
-# define a volume at the highest level
-# should be same name as the volume you defined for DB
+volumes:
+  db_data:
